@@ -5,16 +5,19 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\ClientException;
 use App\RestClient\RestClientException;
+use App\RestClient\RequestQuery;
 
 class RestClient
 {
     public $option = [];
     public $request = []; // Request Option
+    public $requestQuery;
     private $path = '';
 
     public function __construct(string $url)
     {
         $this->setUrl($url);
+        $this->requestQuery = new RequestQuery();
     }
 
     protected function setUrl(string $url)
@@ -44,7 +47,14 @@ class RestClient
     {
         $client = new Client($this->option);
         $pathUrl = $this->path.$pathUrl;
+
         $requestOption = $this->request;
+        if(isset($requestOption['query'])) {
+            $requestOption['query'] = [ ...$requestOption['query'], ...$this->requestQuery->toArray() ];
+        } else {
+            $requestOption['query'] = $this->requestQuery->toArray();
+        }
+
         try {
 
             $this->response = $client->request($httpMethod, $pathUrl, $requestOption);
