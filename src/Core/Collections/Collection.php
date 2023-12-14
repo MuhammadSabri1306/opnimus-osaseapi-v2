@@ -22,6 +22,11 @@ class Collection
         return $this->data[$key];
     }
 
+    public function __isset($key)
+    {
+        return isset($this->data[$key]);
+    }
+
     public function set($key, $value)
     {
         $this->data[$key] = $value;
@@ -30,6 +35,11 @@ class Collection
     public function unset($key)
     {
         unset($this->data[$key]);
+    }
+
+    public function get($key, $defaultValue = null)
+    {
+        return isset($this->data[$key]) ? $this->data[$key] : $defaultValue;
     }
 
     public function toArray()

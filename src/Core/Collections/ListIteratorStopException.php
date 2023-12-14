@@ -1,4 +1,4 @@
 <?php
 namespace App\Core\Collections;
 
-class ListIterator extends \Exception {}
+class ListIteratorStopException extends \Exception {}

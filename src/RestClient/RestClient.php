@@ -3,7 +3,7 @@ namespace App\RestClient;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
-use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\BadResponseException;
 use App\RestClient\RestClientException;
 use App\RestClient\RequestQuery;
 
@@ -50,7 +50,7 @@ class RestClient
 
         $requestOption = $this->request;
         if(isset($requestOption['query'])) {
-            $requestOption['query'] = [ ...$requestOption['query'], ...$this->requestQuery->toArray() ];
+            $requestOption['query'] = array_merge($requestOption['query'], $this->requestQuery->toArray());
         } else {
             $requestOption['query'] = $this->requestQuery->toArray();
         }
@@ -61,7 +61,7 @@ class RestClient
             $body = $this->response->getBody();
             return json_decode($body, $associative);
         
-        } catch (ClientException $err) {
+        } catch (BadResponseException $err) {
             throw new RestClientException($err);
         }
     }

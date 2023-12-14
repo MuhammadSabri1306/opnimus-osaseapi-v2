@@ -1,15 +1,37 @@
 <?php
 
 function dd(...$vars) {
-    echo '<style>';
-    echo 'pre { background-color: #f6f8fa; padding: 10px; }';
-    echo 'strong { color: #e91e63; }';
-    echo '</style>';
+
+    ?><style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 0;
+        }
+        pre {
+            background-color: #f6f8fa;
+            padding: 20px;
+            width: 95vw;
+            overflow-x: auto;
+        }
+        strong { color: #e91e63; }
+    </style><?php
+
+    $printVar = function($var) {
+        ?><pre><?php
+        var_dump($var);
+        ?></pre><?php
+    };
 
     foreach ($vars as $var) {
-        echo '<pre>';
-        var_dump($var);
-        echo '</pre>';
+        if(is_callable($var)) {
+            $var($printVar);
+        } else {
+            $printVar($var);
+        }
     }
     die();
 }

@@ -11,7 +11,7 @@ class CollectionList
     public function __construct($collections = [])
     {
         if($collections instanceof Collection) {
-            array_push($this->$collections, $collections);
+            array_push($this->collections, $collections);
         }
         
         foreach($collections as $item) {
@@ -42,7 +42,7 @@ class CollectionList
         if(!$collection instanceof Collection) {
             $collection = new Collection($collection);
         }
-        array_push($this->$collections, $collection);
+        array_push($this->collections, $collection);
     }
     
     public function map(callable $formatter)
@@ -68,7 +68,7 @@ class CollectionList
     public function find(callable $checker): Collection
     {
         $collection = null;
-        $this->each(function($item) use(&$collection) {
+        $this->each(function($item) use(&$collection, $checker) {
             if($checker($item)) {
                 $collection = $item;
                 CollectionList::stopIteration();
@@ -80,7 +80,7 @@ class CollectionList
     public function findIndex(callable $checker): Collection
     {
         $collectionIndex = null;
-        $this->each(function($item, $index) use(&$collection, $collectionIndex) {
+        $this->each(function($item, $index) use(&$collection, $collectionIndex, $checker) {
             if($checker($item)) {
                 $collectionIndex = $index;
                 CollectionList::stopIteration();
