@@ -3,8 +3,8 @@ namespace App\Controller;
 
 class HomeController extends ApiController
 {
-    public function index($request, $response)
+    public function index()
     {
-        return $this->toJsonResponse($response, [ 'success' => true ]);
+        return $this->toJsonResponse([ 'success' => true ]);
     }
 }

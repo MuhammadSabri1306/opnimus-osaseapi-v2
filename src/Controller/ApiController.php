@@ -2,17 +2,28 @@
 namespace App\Controller;
 
 use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
 class ApiController
 {
-    public function toJsonResponse(Response $response, array $data = [])
+    protected $request;
+    protected $response;
+
+    public function __construct(Request $request, Response $response) {
+        $this->request = $request;
+        $this->response = $response;
+    }
+ 
+    public function toJsonResponse(array $data = [])
     {
+        $response = $this->response;
         $response->getBody()->write( json_encode($data) );
         return $response->withHeader('Content-Type', 'application/json');
     }
     
-    public function toErrorJsonResponse(Response $response, string $message = '', int $code = 200)
+    public function toErrorJsonResponse(string $message = '', int $code = 200)
     {
+        $response = $this->response;
         if($code != 200) {
             $response = $response->withStatus($code);
         }
@@ -23,8 +34,9 @@ class ApiController
         return $response->withHeader('Content-Type', 'application/json');
     }
     
-    public function isAuthorized(Response $response)
+    public function isAuthorized()
     {
+        $request = $this->request;
         $params = $request->getQueryParams();
 
         if(isset($params['token'])) {

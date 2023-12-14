@@ -10,6 +10,11 @@ use App\Controller\PortController;
 Route::register(function ($app) {
 
     $app->get('/', [ HomeController::class, 'index' ]);
+    $app->get('/detail/{id}', [ HomeController::class, 'index' ]);
+    // $app->get('/', function ($request, $response) {
+    //     return $response->withJson([ 'success' => true ]);
+    // });
+    // $app->get('/api/osasev2', $handle(HomeController::class, 'index'));
 
     $app->get('/getrtuport', [ PortController::class, 'index' ]);
 
