@@ -65,7 +65,7 @@ class CollectionList
         } catch(ListIteratorStopException $e) {}
     }
 
-    public function find(callable $checker): Collection
+    public function find(callable $checker)
     {
         $collection = null;
         $this->each(function($item) use(&$collection, $checker) {
@@ -77,9 +77,9 @@ class CollectionList
         return $collection;
     }
 
-    public function findIndex(callable $checker): Collection
+    public function findIndex(callable $checker): int
     {
-        $collectionIndex = null;
+        $collectionIndex = -1;
         $this->each(function($item, $index) use(&$collection, $collectionIndex, $checker) {
             if($checker($item)) {
                 $collectionIndex = $index;
