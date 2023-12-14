@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service name="NewOsase API" endpoint="https://opnimus.telkom.co.id/api/osasev2">
+
+    <!-- <resource path="/getlasttime" type="GET"></resource> -->
+
+    <resource path="/getrtuport" type="GET">
+        <parameter name="token" type="xsd:string" use="required"></parameter>
+        <parameter name="divre" type="xsd:string"></parameter>
+        <!-- <parameter name="witel" type="xsd:string"></parameter> -->
+        <parameter name="datel" type="xsd:string"></parameter>
+        <!-- <parameter name="tipesite" type="xsd:string"></parameter> -->
+        <parameter name="lokasi" type="xsd:string"></parameter>
+        <parameter name="rtuid" type="xsd:string"></parameter>
+        <parameter name="namartu" type="xsd:string"></parameter>
+        <parameter name="port" type="xsd:string"></parameter>
+        <parameter name="tipeport" type="xsd:string"></parameter>
+        <!-- <parameter name="namaport" type="xsd:string"></parameter> -->
+        <!-- <parameter name="value" type="xsd:string"></parameter> -->
+        <parameter name="satuan" type="xsd:string"></parameter>
+        <!-- <parameter name="durasi" type="xsd:string"></parameter> -->
+        <parameter name="flag" type="xsd:integer"></parameter>
+    </resource>
+
+    <resource path="/getrtulist" type="GET">
+        <parameter name="token" type="xsd:string" use="required"></parameter>
+        <parameter name="divre" type="xsd:string"></parameter>
+        <parameter name="witel" type="xsd:string"></parameter>
+        <parameter name="datel" type="xsd:string"></parameter>
+        <!-- <parameter name="tipesite" type="xsd:string"></parameter> -->
+        <parameter name="rtuid" type="xsd:string"></parameter>
+    </resource>
+
+    <resource path="/getrtustatus" type="GET">
+        <parameter name="token" type="xsd:string" use="required"></parameter>
+        <parameter name="divre" type="xsd:string"></parameter>
+        <parameter name="witel" type="xsd:string"></parameter>
+        <parameter name="datel" type="xsd:string"></parameter>
+        <!-- <parameter name="tipesite" type="xsd:string"></parameter> -->
+        <parameter name="rtuid" type="xsd:string"></parameter>
+        <parameter name="rtustatus" type="xsd:string"></parameter>
+    </resource>
+
+</service>

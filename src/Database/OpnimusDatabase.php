@@ -1,9 +1,9 @@
 <?php
 namespace App\Database;
 
-use MeekroDB;
+use App\Database\Database;
 
-class OpnimusDatabase extends MeekroDB
+class OpnimusDatabase extends Database
 {
     public function __construct(string $databaseName)
     {

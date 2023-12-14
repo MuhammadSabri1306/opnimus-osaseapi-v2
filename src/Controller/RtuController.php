@@ -3,13 +3,14 @@ namespace App\Controller;
 
 use App\Core\Collections\Collection;
 use App\Core\Collections\CollectionList;
+use App\Database\Database;
 use App\Database\OpnimusDatabase;
 use App\RestClient\RestClient;
 use App\RestClient\RestClientException;
 
 use App\Controller\ApiController;
 
-class PortController extends ApiController
+class RtuController extends ApiController
 {
     public function index()
     {
@@ -17,11 +18,11 @@ class PortController extends ApiController
             return $this->toErrorJsonResponse('Not Authorized');
         }
 
-        $api = new RestClient('https://newosase.telkom.co.id/api/v1');
         $params = $this->getAvailableParams();
-        $apiParams = new Collection();
-
         $dbOpnimusNew = new OpnimusDatabase('juan5684_opnimus_new');
+
+        $api = new RestClient('https://newosase.telkom.co.id/api/v1');
+        $apiParams = new Collection();
 
         if(isset($params->divre)) {
             $regionalId = $dbOpnimusNew->queryFirstField('SELECT id FROM regional WHERE divre_code=%s', $params->divre);
@@ -38,53 +39,23 @@ class PortController extends ApiController
         }
 
         if(isset($params->datel)) {
-            $datelId = $dbOpnimusNew->queryFirstField('SELECT id FROM datel WHERE datel_name=%s', $params->datel);
-            if($datelId) {
-                $apiParams->datelId = $datelId;
-            }
+            $apiParams->datel = "%$params->datel%";
         }
 
-        if(isset($params->lokasi)) {
-            $locId = $dbOpnimusNew->queryFirstField('SELECT id FROM rtu_location WHERE location_sname=%s', $params->lokasi);
-            if($locId) {
-                $apiParams->locationId = $locId;
-            }
-        }
+        $apiParams->isArea = 'hide';
+        $apiParams->level = 1;
+        $apiParams->isChildren = 'view';
 
-        if(isset($params->rtuid)) {
-            $apiParams->searchRtuSname = $params->rtuid;
-        }
-
-        if(isset($params->namartu)) {
-            $apiParams->searchRtuName = "%$params->namartu%";
-        }
-
-        if(isset($params->port)) {
-            $apiParams->searchNoPort = $params->port;
-        }
-
-        if(isset($params->tipeport)) {
-            $apiParams->searchIdentifier = $params->tipeport;
-        }
-
-        if(isset($params->satuan)) {
-            $apiParams->searchUnits = $params->satuan;
-        }
-
-        if(isset($params->flag)) {
-            $apiParams->isAlert = $params->flag;
-        }
-
-        $ports = [];
+        $rtuMap = [];
         try {
 
             $api->request['query'] = $apiParams->toArray();
             $api->request['verify'] = false;
             $api->request['headers'] = [ 'Accept' => 'application/json' ];
 
-            $response = $api->sendRequest('GET', '/dashboard-service/dashboard/rtu/port-sensors');
-            if($response && is_array($response->result->payload)) {
-                $ports = $response->result->payload;
+            $response = $api->sendRequest('GET', '/parameter-service/mapview');
+            if($response && is_array($response->result)) {
+                $rtuMap = $response->result;
             }
 
         } catch(RestClientException $err) {
@@ -102,40 +73,47 @@ class PortController extends ApiController
 
         $regionalId = $apiParams->get('regionalId', null);
         $witelId = $apiParams->get('witelId', null);
-        $rtuSname = $apiParams->get('searchRtuSname', null);
+        $rtuSname = $params->get('rtuid', null);
         $rtus = $this->getRtus($dbOpnimusNew, $regionalId, $witelId, $rtuSname);
 
-        $data = new CollectionList();
-        foreach($ports as $item) {
+        $rtuList = new CollectionList();
+        foreach($rtuMap as $regional) {
+            foreach($regional->witel as $witel) {
+                foreach($witel->rtu as $rtu) {
 
-            $itemRtuSname = $item->rtu_sname ?? null;
-            $rtuData = $rtus->find(fn($rtu) => $rtu->rtu_sname == $itemRtuSname);
+                    $itemRtuSname = $rtu->rtu_sname ?? null;
+                    $rtuData = $rtus->find(fn($rtuItem) => $rtuItem->rtu_sname == $itemRtuSname);
+                    
+                    $item = new Collection();
+                    
+                    $item->RTU_ID = $itemRtuSname;
+                    $item->NAMA_RTU = $rtu->rtu_name ?? null;
+                    $item->IP_RTU = null;
+                    $item->ID_MD = null;
+                    $item->MD_NAME = null;
+                    $item->MD_IP = null;
+                    $item->LOKASI = $rtu->locs_name ?? null;
+                    $item->TIPE_SITE = null;
+                    $item->DATEL_KODE = null;
+                    $item->DATEL = $rtu->name ?? null;
+                    $item->WITEL_KODE = $rtuData ? $rtuData->witel_code : null;
+                    $item->WITEL = $witel->name ?? null;
+                    $item->DIVRE_KODE = $rtuData ? $rtuData->regional_code : null;
+                    $item->DIVRE = $regional->name ?? null;
+                    
+                    if($rtuSname && $rtuData) {
+                        $rtuList->push($item);
+                    } elseif(!$rtuSname) {
+                        $rtuList->push($item);
+                    }
 
-            $port = new Collection();
-            $port->RTU_ID = $itemRtuSname;
-            $port->NAMA_RTU = $item->rtu_name ?? null;
-            $port->PORT = $item->no_port ?? null;
-            $port->NAMA_PORT = $item->port_name ?? null;
-            $port->TIPE_PORT = $item->identifier ?? null;
-            $port->JENIS_PORT = null;
-            $port->SATUAN = $item->units ?? null;
-            $port->VALUE = $item->value ?? null;
-            $port->STATUS = isset($item->severity->name) ? $item->severity->name : null;
-            $port->DURASI = null;
-            $port->TIPE_SITE = null;
-            $port->LOKASI = $item->location ?? null;
-            $port->DATEL = $rtuData ? $rtuData->datel_name : null;
-            $port->DATEL_KODE = null;
-            $port->WITEL = $item->witel ?? null;
-            $port->WITEL_KODE = $rtuData ? $rtuData->witel_code : null;
-            $port->DIVRE = $item->regional ?? null;
-            $port->DIVRE_KODE = $rtuData ? $rtuData->regional_code : null;
 
-            $data->push($port);
 
+                }
+            }
         }
 
-        return $this->toJsonResponse($data->toArray());
+        return $this->toJsonResponse($rtuList->toArray());
     }
 
     protected function getAvailableParams()
@@ -145,16 +123,7 @@ class PortController extends ApiController
             'witel',
             'datel',
             // 'tipesite',
-            'lokasi',
-            'rtuid',
-            'namartu',
-            'port',
-            'tipeport',
-            // 'namaport',
-            // 'value',
-            'satuan',
-            // 'durasi',
-            'flag',
+            'rtuid'
         ];
 
         $params = $this->request->getQueryParams();
